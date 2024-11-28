@@ -1,0 +1,63 @@
+
+// // 1
+// const express = require('express'); //Recebe o express
+// const colecaoUf = require('./dados/dados.js'); //Recebe TODAS as informações que estão no arquivo dados.js
+// // Porém ele retorna os valores de dados.js como objeto, sendo nescessário usar colecaoUf.colecaoUf
+
+// 2
+import express from 'express';
+import { buscarUfs, buscarUfPorId, buscarUfsPorNome } from './servicos/servico';
+
+const app = express(); //Instânciar o express
+
+app.get('/ufs', (req, res) => {
+    const nomeUf = req.query.busca; // recebe o valor que foi passado no parâmetro busca  // O serve query para pegar o que está sendo passado
+    const resultado = nomeUf ? buscarUfsPorNome(nomeUf) : buscarUfs; // Se for passado algum parâmetro no busca, vai retornar o valor, se não retorna a coleção
+    if (resultado.length > 0) {
+        res.json(resultado) // Se o resultado tiver algo, não for vazio, vai retornar o resultado
+    } else {
+        res.status(404).send({"erro": "Nenhuma UF encontrada"}) // Se o resultado for vazio, irá retornar esse erro
+    }
+    // res.json(colecaoUf.colecaoUf); //A rota recebe um valor dinâmico como parâmetro //Chama somente os dados da coleçãoUf (nossa coleção de dados) que estão salvos na variável
+}); //Quando o cliente acessar essa rota, terá acesso a nossa coleção de dados
+
+app.get('/ufs/:iduf', (req, res) => {
+    const uf = buscarUfPorId(req.params.iduf);
+    if (uf) {
+        res.json(uf);
+    } else if (isNaN(parseInt(req.params.iduf))) {
+        res.status(400).send({ "erro": "Requisição inválida" });
+    } else {
+        res.status(404).send({ "erro": "UF não encontrada" })
+    }
+});
+
+// app.get('/ufs/:iduf', (req, res) => {  ////Quando houver ':' significa que o valor será dinâmico, ou seja, que o valor pode ser mudado
+//     const idUF = parseInt(req.params.iduf); //Salva o valor na constante //O 'iduf' vem da rota da linha anterior
+//     let mensagemErro = ''; //Cria a variável
+//     let uf; //Cria a variável uf
+
+//     if (!(isNaN(idUF))) { //Se for um número
+//         uf = colecaoUf.find(u => u.id === idUF); //Chama os dados que está salvo na variável em que o id vai ser igual a aquele digitado pelo usuário
+
+//         if (!uf) {
+//             mensagemErro = 'UF não encontrada'; //Vai retornar que a UF não existe, pois ele digitou um número fora do intervalo de 1 a 27
+//         } 
+//     } else {
+//         mensagemErro = 'Requisição inválida'; //Vai retornar que é um valor inválido, pois ele digitou algo que não seja um número
+//     }
+
+    
+//     if (uf) { //Se o uf não for um valor vazio
+//         res.json(uf);
+//     } else {
+//         res.status(404).json({"erro": mensagemErro}); //Se não for um número vai aparecer o erro 404
+//     }
+
+// });
+
+//find percorre a coleção e verifica o que pedimos, nesse caso, verifica se o id existe na coleção, se o id existir, a variável vai receber o valor do id, se o id não existir, a constante não terá valor nenhum
+
+app.listen(8080, () => {
+    console.log('Servidor iniciado na porta 8080');
+});
